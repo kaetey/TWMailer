@@ -139,7 +139,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Client.cpp" />
     <ClCompile Include="Message.cpp" />
+    <ClCompile Include="Server.cpp" />
     <ClCompile Include="TWMailer.cpp" />
     <ClCompile Include="User.cpp" />
   </ItemGroup>
