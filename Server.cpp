@@ -1,10 +1,18 @@
 #include <sys/socket.h>
 #include <string.h>
+#include <signal.h>
 
-#define PORT 8080 //portnumber?
+#define PORT 5901 //portnumber?
 #define BUF 1024
 
 int main(void) {
+	//signal handler
+	if (signal(SIGINT, signalHandler) == SIG_ERR)
+	{
+		perror("signal can not be registered");
+		return EXIT_FAILURE;
+	}
+
 	//create socket
 	int socket = -1;
 
@@ -50,61 +58,75 @@ int main(void) {
 	int new_socket = -1;
 	struct sockaddr_in client_adress;
 
-	if ((new_socket = accept(socket, (struct sockaddr*)&client_adress, &sizeof(struct 											sockaddr_in)) == -1)
+	if ((new_socket = accept(socket, (struct sockaddr*)&client_adress, &sizeof(struct sockaddr_in)) == -1)
 	{
-
+			
 	}
+}
 
+void clientCommunication(void* curr_socket) {
+	int* current_socket = (int*)curr_socket;
+		std::string welc_msg = "Welcome!\n Please enter your command!\n";
+		//send welcome message to client
+		if (send(current_socket, welc_msg, strlen(welc_msg), 0) {
+			perror("send failed");
+				return NULL; //why null??
+		}
+		else {
+			//
+		}
 
-	void clientCommunication(void* curr_socket) {
-		int* current_socket = (int*)curr_socket;
-			std::string welc_msg = "Welcome!\n Please enter your command!\n";
-			//send welcome message to client
-			if (send(current_socket, welc_msg, strlen(welc_msg), 0) {
-				perror("send failed");
-					return NULL; //why null??
+	do {
+		//receive data from client
+		char buffer[BUF];
+			int size;
+		if (size = recv(*current_socket, buffer, BUF - 1, 0) == -1) {
+			perror("receive failed");
+			break;
+		}
+		else if (size == 0) {
+			printf("Client closed remote socket\n"); // ignore error
+			break;
+		}
+
+		// remove ugly debug message, because of the sent newline of client
+		if (buffer[size - 2] == '\r' && buffer[size - 1] == '\n') size -= 2;
+		else if (buffer[size - 1] == '\n') size--;
+
+		buffer[size] = '\0';
+		printf("Message received: %s\n", buffer); // ignore error
+
+		if (send(*current_socket, "OK", 3, 0) == -1)
+		{
+			perror("send answer failed");
+			return NULL;
+		}
+	} while ()
+
+}
+
+void signalHandler(int signal) {
+	if (signal == SIGINT) {
+		if (new_socket != -1) {
+			if (shutdown(new_socket, SHUT_RDWR) == -1) {
+				perror("shutdown new_socket");
 			}
-			else {
-				printMenu();
+			if (close(new_socket) == -1) {
+				perror("close new_socket");
 			}
-
-		do {
-			//receive data from client
-			char buffer[BUF];
-				int size;
-			if (size = recv(*current_socket, buffer, BUF - 1, 0) == -1) {
-				perror("receive failed");
-				break;
+			new_socket = -1;
+		}
+		if (create_socket != -1) {
+			if (shutdown(create_socket, SHUT_RDWR) == -1) {
+				perror("shutdown create_socket");
 			}
-			else if (size == 0) {
-				printf("Client closed remote socket\n"); // ignore error
-				break;
+			if (close(create_socket) == -1) {
+				perror("close create_socket");
 			}
-
-			// remove ugly debug message, because of the sent newline of client
-			if (buffer[size - 2] == '\r' && buffer[size - 1] == '\n') size -= 2;
-			else if (buffer[size - 1] == '\n') size--;
-
-			buffer[size] = '\0';
-			printf("Message received: %s\n", buffer); // ignore error
-
-			if (send(*current_socket, "OK", 3, 0) == -1)
-			{
-				perror("send answer failed");
-				return NULL;
-			}
-		} while ()
-
+			create_socket = -1;
+		}
 	}
-
-	void printMenu() {
+	else {
+		exit(signal); //EXIT_SUCCESS?
 	}
-
-
-
-
-
-
-
-
 }
