@@ -1,9 +1,12 @@
 #include <sys/socket.h>
-#include <string.h>
 #include <signal.h>
+#include <string>
 
 #define PORT 5901 //portnumber?
-#define BUF 1024
+#define BUF 1024 //what does 1024 mean?
+
+int socket, new_socket = -1;
+int abortRequested = 0;
 
 int main(void) {
 	//signal handler
@@ -14,8 +17,6 @@ int main(void) {
 	}
 
 	//create socket
-	int socket = -1;
-
 	if (socket = socket(AF_INET, SOCK_STREAM, 0) == -1) {
 		perror("Socket error");
 		return EXIT_FAILURE;
@@ -52,36 +53,59 @@ int main(void) {
 		return EXIT_FAILURE;
 	}
 
-	printf("Waiting for connections...\n");
+	while (!abortRequested) {
+		printf("Waiting for connections...\n");
 
-	//accept connections from client
-	int new_socket = -1;
-	struct sockaddr_in client_adress;
+		//accept connections from client
+		struct sockaddr_in client_address;
 
-	if ((new_socket = accept(socket, (struct sockaddr*)&client_adress, &sizeof(struct sockaddr_in)) == -1)
-	{
-			
+		if ((new_socket = accept(socket, (struct sockaddr*)&client_address, &sizeof(struct sockaddr_in)) == -1){
+			if(abortRequested) perror("accept error after aborted");
+			else perror("accept error");
+			break;
+		}
+		
+		//start client
+		printf("Client connected from %s:%d...\n", inet_ntoa(client_address.sin_addr), ntohs(client_address.sin_port)); //ignore error handling
+		clientCommunication(&new_socket);
+		new_socket = -1; //why?
 	}
+
+	// free the descriptor
+	if (socket != -1)
+	{
+		if (shutdown(socket, SHUT_RDWR) == -1)
+		{
+			perror("shutdown socket");
+		}
+		if (close(socket) == -1)
+		{
+			perror("close socket");
+		}
+		socket = -1;
+	}
+
+	return EXIT_SUCCESS;
 }
 
-void clientCommunication(void* curr_socket) {
+void *clientCommunication(void* curr_socket) { //warum eine stern vor methodenname?
+	char buffer[BUF];
 	int* current_socket = (int*)curr_socket;
-		std::string welc_msg = "Welcome!\n Please enter your command!\n";
-		//send welcome message to client
-		if (send(current_socket, welc_msg, strlen(welc_msg), 0) {
-			perror("send failed");
-				return NULL; //why null??
-		}
-		else {
-			//
-		}
+	std::string welc_msg = "Welcome!\r\n"; //geht auch mit buffer
+
+	//send welcome message to client
+	if (send(current_socket, welc_msg, strlen(welc_msg), 0) == -1) {
+		perror("send failed");
+		return NULL; //why null??
+	}
+	//send menu? or menu im client?
 
 	do {
 		//receive data from client
-		char buffer[BUF];
-			int size;
+		int size;
 		if (size = recv(*current_socket, buffer, BUF - 1, 0) == -1) {
-			perror("receive failed");
+			if (abortRequested) perror("receive failed after aborted");
+			else perror("receive failed");
 			break;
 		}
 		else if (size == 0) {
@@ -101,12 +125,31 @@ void clientCommunication(void* curr_socket) {
 			perror("send answer failed");
 			return NULL;
 		}
-	} while ()
+	} while (strcmp(buffer, "quit") != 0 && !abortRequested);
 
+	// closes/frees the descriptor if not already
+	if (*current_socket != -1)
+	{
+		if (shutdown(*current_socket, SHUT_RDWR) == -1)
+		{
+			perror("shutdown new_socket");
+		}
+		if (close(*current_socket) == -1)
+		{
+			perror("close new_socket");
+		}
+		*current_socket = -1;
+	}
+
+	return NULL; //why return?
 }
 
 void signalHandler(int signal) {
 	if (signal == SIGINT) {
+		printf("abort Requested... "); // ignore error
+		abortRequested = 1;
+
+		//free descriptors
 		if (new_socket != -1) {
 			if (shutdown(new_socket, SHUT_RDWR) == -1) {
 				perror("shutdown new_socket");
@@ -116,14 +159,14 @@ void signalHandler(int signal) {
 			}
 			new_socket = -1;
 		}
-		if (create_socket != -1) {
-			if (shutdown(create_socket, SHUT_RDWR) == -1) {
+		if (socket != -1) {
+			if (shutdown(socket, SHUT_RDWR) == -1) {
 				perror("shutdown create_socket");
 			}
-			if (close(create_socket) == -1) {
+			if (close(socket) == -1) {
 				perror("close create_socket");
 			}
-			create_socket = -1;
+			socket = -1;
 		}
 	}
 	else {
