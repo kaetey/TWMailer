@@ -12,6 +12,14 @@
 #define PORT 5901
 
 
+void sendMessage(int create_socket);
+
+void listMessage(int create_socket);
+
+void readMessage(int create_socket);
+
+void deleteMessage(int create_socket);
+
 int main(int argc, char **argv)
 {
     int create_socket;
@@ -71,52 +79,33 @@ int main(int argc, char **argv)
     do
     {
         printf(">> ");
-        if (fgets(buffer, BUF, stdin) != NULL)
-        {
+        if (fgets(buffer, BUF, stdin) != NULL) {
             int size = strlen(buffer);
             // remove new-line signs from string at the end
-            if (buffer[size - 2] == '\r' && buffer[size - 1] == '\n')
-            {
+            if (buffer[size - 2] == '\r' && buffer[size - 1] == '\n') {
                 size -= 2;
                 buffer[size] = 0;
-            }
-            else if (buffer[size - 1] == '\n')
-            {
+            } else if (buffer[size - 1] == '\n') {
                 --size;
                 buffer[size] = 0;
             }
-            isQuit = strcmp(buffer, "quit") == 0;
 
-            // SEND DATA
-            if ((send(create_socket, buffer, size, 0)) == -1)
-            {
-                perror("send error");
-                break;
-            }
-
-            // RECEIVE FEEDBACK
-            size = recv(create_socket, buffer, BUF - 1, 0);
-            if (size == -1)
-            {
-                perror("recv error");
-                break;
-            }
-            else if (size == 0)
-            {
-                printf("Server closed remote socket\n"); // ignore error
-                break;
-            }
-            else
-            {
-                buffer[size] = '\0';
-                printf("<< %s\n", buffer); // ignore error
-                if (strcmp("OK", buffer) != 0)
-                {
-                    fprintf(stderr, "<< Server error occured, abort\n");
-                    break;
-                }
+            if (strcmp(buffer, "SEND") == 0) {
+                sendMessage(create_socket);
+            } else if (strcmp(buffer, "LIST") == 0) {
+                listMessage(create_socket);
+            } else if (strcmp(buffer, "READ") == 0) {
+                readMessage(create_socket);
+            } else if (strcmp(buffer, "DEL") == 0) {
+                deleteMessage(create_socket);
+            } else if (strcmp(buffer, "QUIT") == 0) {
+                isQuit = 1;
+            } else {
+                printf("Please enter a valid command:\nSEND--LIST--READ--DEL--QUIT\n");
+                continue;
             }
         }
+
     } while (!isQuit);
 
     // CLOSES THE DESCRIPTOR
@@ -135,4 +124,49 @@ int main(int argc, char **argv)
     }
 
     return EXIT_SUCCESS;
+}
+
+void deleteMessage(int create_socket) {
+
+}
+
+void readMessage(int create_socket) {
+
+}
+
+void listMessage(int create_socket) {
+    char message[15];
+    char username[8]; //8 or maybe 9 with \n
+    char recvMessage[BUF];
+    printf("Enter a username: ");
+    if (fgets(username, BUF, stdin) != NULL) {
+        int size = strlen(username);
+        // remove new-line signs from string at the end
+        if (username[size - 2] == '\r' && username[size - 1] == '\n') {
+            size -= 2;
+            username[size] = 0;
+        } else if (username[size - 1] == '\n') {
+            --size;
+            username[size] = 0;
+        }
+    }else{
+        exit(EXIT_FAILURE);
+    }
+    strcat(message, "LIST\n");
+    strcat(message, username);
+    strcat(message, "\n");
+
+    if(send(create_socket, message, strlen(message), 0) == -1) {
+        perror("LIST failed to send!");
+        exit(EXIT_FAILURE);
+    }
+    if(recv(create_socket, recvMessage, strlen(recvMessage), 0) == -1){
+        perror("LIST failed to receive!");
+        exit(EXIT_FAILURE);
+    }
+    printf(recvMessage);
+}
+
+void sendMessage(int create_socket) {
+
 }
