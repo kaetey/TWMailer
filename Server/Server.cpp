@@ -2,8 +2,6 @@
 #include <signal.h>
 #include <string>
 #include <sstream>
-#include <fstream>
-#include <iostream>
 
 #define PORT 5901 //portnumber?
 #define BUF 1024 //what does 1024 mean?
@@ -181,51 +179,26 @@ void signalHandler(int signal) {
 
 void mailHandler(char buffer[]) {
 
-	std::stringstream message(buffer);
+	std::istringstream message(buffer);
 	std::string command;
 	getline(message, command);
-	std::cout << "command: " << command << std::endl;
 
-	if (command.compare("SEND") == 0) {
-		//string test;
-		//getline(message, test);
-		//cout << "after getline(): " << test << endl;
-		std::cout << "OK\n";
-
-		sendMessage(message);
+	if (strcmp(buffer, "SEND") == 0) {
+		sendMessage();
 	}
-	else if (req == "LIST") {
-
+	else if (strcmp(buffer, "LIST") == 0) {
+		listMessage();
 	}
-	else if (req == "READ") {
-
+	else if (strcmp(buffer, "READ") == 0) {
+		readMessage();
 	}
-	else if (req == "DEL") {
-
-	}
-	else {
-		cout << "ERR\n";
+	else if (strcmp(buffer, "DEL") == 0) {
+		deleteMessage();
 	}
 }
 
-void sendMessage(std::stringstream &message) {
-	std::string sender, receiver, subject;
-	getline(message, sender);
-	getline(message, receiver);
-	getline(message, subject);
-	std::stringstream copyText;
-	copyText << message.rdbuf();
-	std::ofstream senderFile("./mail-spool-directory/" + sender + ".txt");
-	std::ofstream receiverFile("./mail-spool-directory/" + receiver + ".txt");
+void sendMessage() {
 
-	if (senderFile.is_open() && receiverFile.is_open()) {
-		senderFile << "S" << std::endl << receiver << std::endl << subject << std::endl;
-		senderFile << message.rdbuf();
-		receiverFile << "R" << std::endl << sender << std::endl << subject << std::endl;
-		receiverFile << copyText.rdbuf();
-	}
-
-	senderFile.close();
 }
 
 void listMessage() {
