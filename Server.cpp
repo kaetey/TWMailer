@@ -12,7 +12,7 @@ void* clientCommunication(void* curr_socket);
 void signalHandler(int signal);
 void mailHandler(char buffer[]);
 void sendMessage(std::stringstream& message);
-void listMessages(std::string username);
+int listMessages(std::string username);
 
 int socket, new_socket = -1;
 int abortRequested = 0;
@@ -198,7 +198,7 @@ void mailHandler(char buffer[]) {
 	}
 	else if (command.compare("LIST") == 0) {
 		std::string username = message.str().erase(0, message.str().find("\n") + 1);
-		listMessages(username);
+		int cnt = listMessages(username);
 		//cout << "OK\n";
 	}
 	else if (command.compare("READ") == 0) {
@@ -233,8 +233,16 @@ void sendMessage(std::stringstream &message) {
 	receiverFile.close();
 }
 
-void listMessages(std::string username) {
-	
+int listMessages(std::string username) {
+	int cnt = 0;
+	std::ifstream userFile("./mail-spool-directory/" + usename + ".txt"); //error wenn kein es die datei nicht gibt?
+	if (userFile.is_open()) {
+		while (!userFile.eof()) {
+			//count messages
+			cnt++;
+		}
+	}
+	return cnt;
 }
 
 void readMessage() {
