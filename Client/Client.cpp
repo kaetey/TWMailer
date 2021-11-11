@@ -127,17 +127,112 @@ int main(int argc, char **argv)
 }
 
 void deleteMessage(int create_socket) {
+    char msgNumber[5];
+    char username[8]; //8 or maybe 9 with \n
+    char recvMessage[BUF];
 
+    printf("Enter a username: ");
+    if (fgets(username, BUF, stdin) != NULL) {
+        int size = strlen(username);
+        // remove new-line signs from string at the end
+        if (username[size - 2] == '\r' && username[size - 1] == '\n') {
+            size -= 2;
+            username[size] = 0;
+        } else if (username[size - 1] == '\n') {
+            --size;
+            username[size] = 0;
+        }
+    }else{
+        exit(EXIT_FAILURE);
+    }
+    printf("Enter the message number: ");
+    if (fgets(msgNumber, BUF, stdin) != NULL) {
+        int size = strlen(msgNumber);
+        // remove new-line signs from string at the end
+        if (msgNumber[size - 2] == '\r' && msgNumber[size - 1] == '\n') {
+            size -= 2;
+            msgNumber[size] = 0;
+        } else if (msgNumber[size - 1] == '\n') {
+            --size;
+            msgNumber[size] = 0;
+        }
+    }else{
+        exit(EXIT_FAILURE);
+    }
+
+    strcat(message, "DEL\n");
+    strcat(message, username);
+    strcat(message, "\n");
+    strcat(message, msgNumber);
+    strcat(message, "\n");
+
+    if(send(create_socket, message, strlen(message), 0) == -1) {
+        perror("DEL failed to send!");
+        exit(EXIT_FAILURE);
+    }
+    if(recv(create_socket, recvMessage, strlen(recvMessage), 0) == -1){
+        perror("DEL failed to receive!");
+        exit(EXIT_FAILURE);
+    }
+    printf(recvMessage);
 }
 
 void readMessage(int create_socket) {
+    char msgNumber[5];
+    char username[8]; //8 or maybe 9 with \n
+    char recvMessage[BUF];
 
+    printf("Enter a username: ");
+    if (fgets(username, BUF, stdin) != NULL) {
+        int size = strlen(username);
+        // remove new-line signs from string at the end
+        if (username[size - 2] == '\r' && username[size - 1] == '\n') {
+            size -= 2;
+            username[size] = 0;
+        } else if (username[size - 1] == '\n') {
+            --size;
+            username[size] = 0;
+        }
+    }else{
+        exit(EXIT_FAILURE);
+    }
+    printf("Enter the message number: ");
+    if (fgets(msgNumber, BUF, stdin) != NULL) {
+        int size = strlen(msgNumber);
+        // remove new-line signs from string at the end
+        if (msgNumber[size - 2] == '\r' && msgNumber[size - 1] == '\n') {
+            size -= 2;
+            msgNumber[size] = 0;
+        } else if (msgNumber[size - 1] == '\n') {
+            --size;
+            msgNumber[size] = 0;
+        }
+    }else{
+        exit(EXIT_FAILURE);
+    }
+
+    strcat(message, "READ\n");
+    strcat(message, username);
+    strcat(message, "\n");
+    strcat(message, msgNumber);
+    strcat(message, "\n");
+
+    if(send(create_socket, message, strlen(message), 0) == -1) {
+        perror("READ failed to send!");
+        exit(EXIT_FAILURE);
+    }
+    if(recv(create_socket, recvMessage, strlen(recvMessage), 0) == -1){
+        perror("READ failed to receive!");
+        exit(EXIT_FAILURE);
+    }
+    printf(recvMessage);
 }
 
 void listMessage(int create_socket) {
     char message[15];
     char username[8]; //8 or maybe 9 with \n
     char recvMessage[BUF];
+
     printf("Enter a username: ");
     if (fgets(username, BUF, stdin) != NULL) {
         int size = strlen(username);
