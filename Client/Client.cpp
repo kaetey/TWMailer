@@ -127,6 +127,7 @@ int main(int argc, char **argv)
 }
 
 void deleteMessage(int create_socket) {
+    char message[20];
     char msgNumber[5];
     char username[8]; //8 or maybe 9 with \n
     char recvMessage[BUF];
@@ -178,6 +179,7 @@ void deleteMessage(int create_socket) {
 }
 
 void readMessage(int create_socket) {
+    char message[20];
     char msgNumber[5];
     char username[8]; //8 or maybe 9 with \n
     char recvMessage[BUF];
