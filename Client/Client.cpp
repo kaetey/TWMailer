@@ -75,7 +75,11 @@ int main(int argc, char **argv)
         buffer[size] = '\0';
         printf("%s", buffer); // ignore error
     }
-
+    printf("SEND: send a message from client to server.\n"
+           "LIST: list all messages from a specific user.\n"
+           "READ: read a specific message from a user.\n"
+           "DEL: del a specific message from a user.\n"
+           "QUIT: Disconnect and quit program.\n");
     do
     {
         printf(">> ");
