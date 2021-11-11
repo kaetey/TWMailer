@@ -1,5 +1,6 @@
-﻿  Server.cpp
+﻿  Client.cpp
+C:\Users\ongco\Desktop\WS2021\Grundlagen_verteilter_Systeme\TWMailer_Basic\TWMailer\TWMailer\Client.cpp(2,10): fatal error C1083: Datei (Include) kann nicht geöffnet werden: "sys/socket.h": No such file or directory
+  Server.cpp
 C:\Users\ongco\Desktop\WS2021\Grundlagen_verteilter_Systeme\TWMailer_Basic\TWMailer\TWMailer\Server.cpp(1,10): fatal error C1083: Datei (Include) kann nicht geöffnet werden: "sys/socket.h": No such file or directory
-  TWMailer.cpp
   User.cpp
   Code wird generiert...

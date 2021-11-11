@@ -5,8 +5,14 @@
 #include <fstream>
 #include <iostream>
 
-#define PORT 5901 //portnumber?
+#define PORT 5901 
 #define BUF 1024 //what does 1024 mean?
+
+void* clientCommunication(void* curr_socket);
+void signalHandler(int signal);
+void mailHandler(char buffer[]);
+void sendMessage(std::stringstream& message);
+void listMessages(std::string username);
 
 int socket, new_socket = -1;
 int abortRequested = 0;
@@ -187,49 +193,48 @@ void mailHandler(char buffer[]) {
 	std::cout << "command: " << command << std::endl;
 
 	if (command.compare("SEND") == 0) {
-		//string test;
-		//getline(message, test);
-		//cout << "after getline(): " << test << endl;
-		std::cout << "OK\n";
-
 		sendMessage(message);
+		//cout << "OK\n";
 	}
-	else if (req == "LIST") {
+	else if (command.compare("LIST") == 0) {
+		std::string username = message.str().erase(0, message.str().find("\n") + 1);
+		listMessages(username);
+		//cout << "OK\n";
+	}
+	else if (command.compare("READ") == 0) {
 
 	}
-	else if (req == "READ") {
-
-	}
-	else if (req == "DEL") {
+	else if (command.compare("DEL") == 0) {
 
 	}
 	else {
-		cout << "ERR\n";
+		//std::cout << "ERR\n"; -> return to client
 	}
 }
 
 void sendMessage(std::stringstream &message) {
-	std::string sender, receiver, subject;
+	std::string sender, receiver, subject, text;
 	getline(message, sender);
 	getline(message, receiver);
 	getline(message, subject);
-	std::stringstream copyText;
-	copyText << message.rdbuf();
-	std::ofstream senderFile("./mail-spool-directory/" + sender + ".txt");
-	std::ofstream receiverFile("./mail-spool-directory/" + receiver + ".txt");
+	std::ofstream senderFile("./mail-spool-directory/" + sender + ".txt", std::ios::app);
+	std::ofstream receiverFile("./mail-spool-directory/" + receiver + ".txt", std::ios::app);
+	int pos = message.str().find("\n") + 1;
 
 	if (senderFile.is_open() && receiverFile.is_open()) {
 		senderFile << "S" << std::endl << receiver << std::endl << subject << std::endl;
 		senderFile << message.rdbuf();
 		receiverFile << "R" << std::endl << sender << std::endl << subject << std::endl;
-		receiverFile << copyText.rdbuf();
+		receiverFile << message.str().erase(0, pos).erase(0, pos).erase(0, pos).erase(0, pos + 1);
 	}
 
+	message.flush();
 	senderFile.close();
+	receiverFile.close();
 }
 
-void listMessage() {
-
+void listMessages(std::string username) {
+	
 }
 
 void readMessage() {
