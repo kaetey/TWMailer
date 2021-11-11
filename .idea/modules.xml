@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/TWMailer.iml" filepath="$PROJECT_DIR$/.idea/TWMailer.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/TWMailer2.iml" filepath="$PROJECT_DIR$/.idea/TWMailer2.iml" />
     </modules>
   </component>
 </project>
