@@ -12,7 +12,8 @@ void* clientCommunication(void* curr_socket);
 void signalHandler(int signal);
 void mailHandler(char buffer[]);
 void sendMessage(std::stringstream& message);
-int listMessages(std::string username);
+void listMessages(std::string username);
+void readMessages();
 
 int socket, new_socket = -1;
 int abortRequested = 0;
@@ -202,7 +203,12 @@ void mailHandler(char buffer[]) {
 		//cout << "OK\n";
 	}
 	else if (command.compare("READ") == 0) {
-
+		std::string username = message.str().erase(0, message.str().find("\n") + 1);
+		username.pop_back(); //delete last character \n
+		std::string msgNumber = message.str().erase(0, message.str().find("\n") + 1);
+		msgNumber.pop_back();
+		readMessages();
+		cout << "READ OK\n";
 	}
 	else if (command.compare("DEL") == 0) {
 
@@ -233,19 +239,44 @@ void sendMessage(std::stringstream &message) {
 	receiverFile.close();
 }
 
-int listMessages(std::string username) {
+void listMessages(std::string username) {
 	int cnt = 0;
-	std::ifstream userFile("./mail-spool-directory/" + usename + ".txt"); //error wenn kein es die datei nicht gibt?
+	std::string line;
+	std::stringstream message;
+	std::fstream userFile("./mail-spool-directory/" + username + ".txt", std::fstream::in); //error wenn kein es die datei nicht gibt?
+	//cout << "./mail-spool-directory/"+username+".txt\n";
 	if (userFile.is_open()) {
 		while (!userFile.eof()) {
+			//get subjects
+			getline(userFile, line); //get identifier
+			cout << line << endl;
+			if (line.compare("S") == 0) {
+				message << "Sent: ";
+				getline(userFile, line); //skip second line (receiver)
+				getline(userFile, line); //get subject
+				message << line + "\n";
+				getline(userFile, line, '.'); //skip message
+				int pos = userFile.tellg();
+				cout << pos << endl;
+				cout << line;
+				cout << message.str();
+			}
+			else if (line.compare("R") == 0) {
+
+			}
 			//count messages
 			cnt++;
 		}
 	}
-	return cnt;
+	else {
+		cout << "Cannot open file\n";
+	}
+
+	message.flush();
+	userFile.close();
 }
 
-void readMessage() {
+void readMessages() {
 
 }
 
