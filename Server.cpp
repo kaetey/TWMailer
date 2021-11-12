@@ -4,6 +4,8 @@
 #include <sstream>
 #include <fstream>
 #include <iostream>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
 #define PORT 5901 
 #define BUF 1024 //what does 1024 mean?
@@ -69,16 +71,16 @@ int main(void) {
 		//accept connections from client
 		struct sockaddr_in client_address;
 
-		if ((new_socket = accept(socket, (struct sockaddr*)&client_address, &sizeof(struct sockaddr_in)) == -1){
-			if(abortRequested) perror("accept error after aborted");
+		if ((new_socket = accept(socket, (struct sockaddr*)&client_address, &sizeof(struct sockaddr_in)) == -1) {
+			if (abortRequested) perror("accept error after aborted");
 			else perror("accept error");
-			break;
+				break;
 		}
-		
+
 		//start client
 		printf("Client connected from %s:%d...\n", inet_ntoa(client_address.sin_addr), ntohs(client_address.sin_port)); //ignore error handling
-		clientCommunication(&new_socket);
-		new_socket = -1; //why?
+			clientCommunication(&new_socket);
+			new_socket = -1; //why?
 	}
 
 	// free the descriptor
@@ -98,7 +100,7 @@ int main(void) {
 	return EXIT_SUCCESS;
 }
 
-void *clientCommunication(void* curr_socket) { //warum eine stern vor methodenname?
+void* clientCommunication(void* curr_socket) { //warum eine stern vor methodenname?
 	char buffer[BUF];
 	int* current_socket = (int*)curr_socket;
 	std::string welc_msg = "Welcome!\r\n"; //geht auch mit buffer
@@ -199,7 +201,7 @@ void mailHandler(char buffer[]) {
 	}
 	else if (command.compare("LIST") == 0) {
 		std::string username = message.str().erase(0, message.str().find("\n") + 1);
-		int cnt = listMessages(username);
+		listMessages(username);
 		//cout << "OK\n";
 	}
 	else if (command.compare("READ") == 0) {
@@ -208,7 +210,7 @@ void mailHandler(char buffer[]) {
 		std::string msgNumber = message.str().erase(0, message.str().find("\n") + 1);
 		msgNumber.pop_back();
 		readMessages();
-		cout << "READ OK\n";
+		std::cout << "READ OK\n";
 	}
 	else if (command.compare("DEL") == 0) {
 
@@ -218,7 +220,7 @@ void mailHandler(char buffer[]) {
 	}
 }
 
-void sendMessage(std::stringstream &message) {
+void sendMessage(std::stringstream& message) {
 	std::string sender, receiver, subject, text;
 	getline(message, sender);
 	getline(message, receiver);
@@ -249,7 +251,7 @@ void listMessages(std::string username) {
 		while (!userFile.eof()) {
 			//get subjects
 			getline(userFile, line); //get identifier
-			cout << line << endl;
+			std::cout << line << std::endl;
 			if (line.compare("S") == 0) {
 				message << "Sent: ";
 				getline(userFile, line); //skip second line (receiver)
@@ -257,9 +259,9 @@ void listMessages(std::string username) {
 				message << line + "\n";
 				getline(userFile, line, '.'); //skip message
 				int pos = userFile.tellg();
-				cout << pos << endl;
-				cout << line;
-				cout << message.str();
+				std::cout << pos << std::endl;
+				std::cout << line;
+				std::cout << message.str();
 			}
 			else if (line.compare("R") == 0) {
 
@@ -269,7 +271,7 @@ void listMessages(std::string username) {
 		}
 	}
 	else {
-		cout << "Cannot open file\n";
+		std::cout << "Cannot open file\n";
 	}
 
 	message.flush();
